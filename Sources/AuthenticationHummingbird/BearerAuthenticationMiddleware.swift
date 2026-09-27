@@ -5,9 +5,9 @@
 //  Created by Zaid Rahhawi on 9/11/26.
 //
 
-import Authentication
-import Hummingbird
-import HummingbirdAuth
+public import Authentication
+public import Hummingbird
+public import HummingbirdAuth
 import ServiceContextModule
 
 /// Binds the principal a bearer token proves, for the length of the request.
@@ -40,7 +40,7 @@ public struct BearerAuthenticationMiddleware<Context: AuthRequestContext>: Route
     public func handle(
         _ request: Request,
         context: Context,
-        next: (Request, Context) async throws -> Response
+        next: @concurrent (Request, Context) async throws -> Response
     ) async throws -> Response {
         guard let token = request.headers.bearer?.token else {
             return try await next(request, context)

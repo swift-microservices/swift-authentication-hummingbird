@@ -1,0 +1,1 @@
+API breakage: func BearerAuthenticationMiddleware.handle(_:context:next:) is now with nonisolated

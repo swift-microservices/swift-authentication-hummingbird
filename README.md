@@ -3,7 +3,7 @@
 Binding who is calling on Hummingbird: a bearer token, proved and set on the request context.
 
 ```swift
-.package(url: "https://github.com/swift-microservices/swift-authentication-hummingbird.git", from: "0.1.0"),
+.package(url: "https://github.com/swift-microservices/swift-authentication-hummingbird.git", from: "0.2.0"),
 ```
 
 ```swift
@@ -38,7 +38,7 @@ Requiring a caller is a route's decision, made with `IsAuthenticatedMiddleware`.
 
 ## Requirements
 
-Swift 6.3, macOS 15 or Linux. Hummingbird 2.26, HummingbirdAuth 2.3.
+Swift 6.3, macOS 15 or Linux. Hummingbird 2.27, HummingbirdAuth 2.5, swift-authentication 0.2.
 
 ## Development
 

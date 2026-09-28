@@ -96,6 +96,37 @@ struct BearerAuthenticationMiddlewareTests {
         #expect(response.status == .unauthorized)
     }
 
+    enum TraceKey: ServiceContextKey {
+        typealias Value = String
+    }
+
+    @Test("A proved token adds the principal to the ServiceContext already bound")
+    func provedTokenKeepsEnclosingServiceContext() async throws {
+        var enclosing = ServiceContext.topLevel
+        enclosing[TraceKey.self] = "trace-1"
+
+        let body = try await ServiceContext.withValue(enclosing) {
+            let router = Router(context: Context.self)
+            router.add(
+                middleware: BearerAuthenticationMiddleware(
+                    authenticator: TableAuthenticator(identities: ["alice-token": Claims(subject: "alice")], refused: [])
+                )
+            )
+            router.get("/context") { _, _ in
+                let context = ServiceContext.current
+                return "\(context?[TraceKey.self] ?? "-") \(context?[PrincipalKey<Claims, String>.self]?.identity.subject ?? "-")"
+            }
+
+            return try await Application(router: router).test(.router) { client in
+                var headers = HTTPFields()
+                headers[.authorization] = "Bearer alice-token"
+                return try await client.execute(uri: "/context", method: .get, headers: headers) { String(buffer: $0.body) }
+            }
+        }
+
+        #expect(body == "trace-1 alice")
+    }
+
     @Test("A proved token satisfies IsAuthenticatedMiddleware on a protected route")
     func provedTokenPassesIsAuthenticated() async throws {
         let router = Router(context: Context.self)

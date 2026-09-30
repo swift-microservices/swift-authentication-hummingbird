@@ -14,6 +14,9 @@ onward.
 The middleware's context is any `AuthRequestContext`; the token's identity is the context's.
 `BasicAuthRequestContext<Identity>` from HummingbirdAuth is enough for most applications.
 
+Authentication returns an identity or throws. A missing credential continues anonymously;
+a failed authentication ends the request with `401 Unauthorized` before the handler runs.
+
 ## Example
 
 ```swift

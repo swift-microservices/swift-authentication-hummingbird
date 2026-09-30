@@ -13,9 +13,8 @@ import ServiceContextModule
 /// Binds the principal a bearer token proves, for the length of the request.
 ///
 /// The token is read from the `Authorization` header. A request with no token continues
-/// anonymously, which is what an open route needs. A token the authenticator declines continues
-/// unbound. A token it refuses fails the request with `401 Unauthorized`, because absent and
-/// invalid are not the same thing.
+/// anonymously, which is what an open route needs. The authenticator returns an identity or
+/// throws. A failed authentication ends the request with `401 Unauthorized` before the route runs.
 ///
 /// The proven identity is set in two places: the request context's `identity`, which
 /// `IsAuthenticatedMiddleware` and route handlers read, and the task's `ServiceContext` under
@@ -46,9 +45,7 @@ public struct BearerAuthenticationMiddleware<Context: AuthRequestContext>: Route
             return try await next(request, context)
         }
 
-        guard let identity = try await authenticate(token) else {
-            return try await next(request, context)
-        }
+        let identity = try await authenticate(token)
 
         var context = context
         context.identity = identity
@@ -64,7 +61,7 @@ public struct BearerAuthenticationMiddleware<Context: AuthRequestContext>: Route
     /// The rejection is an `HTTPError` rather than the authenticator's error, which carries no
     /// status and would be reported as a server fault: the wrong answer for the most ordinary
     /// request a client makes, one holding a token that has expired.
-    private func authenticate(_ token: String) async throws -> Context.Identity? {
+    private func authenticate(_ token: String) async throws -> Context.Identity {
         do {
             return try await authenticator.authenticate(token)
         } catch {

@@ -10,8 +10,9 @@ This package binds principals on Hummingbird. Read this before changing anything
 - It sets the identity in both places Hummingbird code reads it: the request context's
   `identity`, for `IsAuthenticatedMiddleware` and handlers, and the `ServiceContext` principal,
   for everything downstream. Keep both in step.
-- The three answers are honoured exactly: an identity binds, `nil` continues unbound, a throw is
-  `HTTPError(.unauthorized)`. A request with no token never reaches the authenticator.
+- Authentication returns an identity or throws. An identity binds; a failure ends the request
+  with `HTTPError(.unauthorized)` before the route runs. A request with no token never reaches
+  the authenticator and continues anonymously.
 - The `Authorization` header is read with HummingbirdAuth's own `headers.bearer`; this package
   parses nothing itself.
 

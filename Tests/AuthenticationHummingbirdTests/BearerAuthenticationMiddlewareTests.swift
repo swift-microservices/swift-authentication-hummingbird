@@ -19,19 +19,22 @@ struct BearerAuthenticationMiddlewareTests {
         let subject: String
     }
 
-    /// An authenticator over a table: a known token proves its claims, an unknown one is
-    /// declined, and a token in the refused set throws.
+    /// An authenticator over a table: known tokens prove their claims; unknown or
+    /// refused tokens throw.
     struct TableAuthenticator: Authenticator {
         struct Refused: Error {}
 
         let identities: [String: Claims]
         let refused: Set<String>
 
-        func authenticate(_ token: String) throws -> Claims? {
+        func authenticate(_ token: String) throws -> Claims {
             if refused.contains(token) {
                 throw Refused()
             }
-            return identities[token]
+            guard let identity = identities[token] else {
+                throw Refused()
+            }
+            return identity
         }
     }
 
@@ -39,7 +42,7 @@ struct BearerAuthenticationMiddlewareTests {
 
     /// An application with the middleware and one route that reports what it saw: the request
     /// context's identity and the ServiceContext principal, or `-` for neither.
-    var application: Application<RouterResponder<Context>> {
+    func application(handlerCalls: HandlerCalls) -> Application<RouterResponder<Context>> {
         let router = Router(context: Context.self)
         router.add(
             middleware: BearerAuthenticationMiddleware(
@@ -47,14 +50,15 @@ struct BearerAuthenticationMiddlewareTests {
             )
         )
         router.get("/whoami") { _, context in
+            await handlerCalls.record()
             let principal = ServiceContext.current?[PrincipalKey<Claims, String>.self]
             return "\(context.identity?.subject ?? "-") \(principal?.identity.subject ?? "-") \(principal?.credential ?? "-")"
         }
         return Application(router: router)
     }
 
-    func whoami(authorization: String?) async throws -> (status: HTTPResponse.Status, body: String) {
-        try await application.test(.router) { client in
+    func whoami(authorization: String?, handlerCalls: HandlerCalls = HandlerCalls()) async throws -> (status: HTTPResponse.Status, body: String) {
+        try await application(handlerCalls: handlerCalls).test(.router) { client in
             var headers = HTTPFields()
             if let authorization {
                 headers[.authorization] = authorization
@@ -67,33 +71,40 @@ struct BearerAuthenticationMiddlewareTests {
 
     @Test("A request with no token continues anonymously")
     func noTokenContinuesAnonymously() async throws {
-        let response = try await whoami(authorization: nil)
+        let calls = HandlerCalls()
+        let response = try await whoami(authorization: nil, handlerCalls: calls)
 
         #expect(response.status == .ok)
         #expect(response.body == "- - -")
+        #expect(await calls.count == 1)
     }
 
     @Test("A proved token sets the context identity and binds the principal")
     func provedTokenSetsIdentityAndPrincipal() async throws {
-        let response = try await whoami(authorization: "Bearer alice-token")
+        let calls = HandlerCalls()
+        let response = try await whoami(authorization: "Bearer alice-token", handlerCalls: calls)
 
         #expect(response.status == .ok)
         #expect(response.body == "alice alice alice-token")
+        #expect(await calls.count == 1)
     }
 
-    @Test("A declined token continues unbound")
-    func declinedTokenContinuesUnbound() async throws {
-        let response = try await whoami(authorization: "Bearer unknown-token")
+    @Test("An unknown token is 401 Unauthorized before the route runs")
+    func unknownTokenIsUnauthorized() async throws {
+        let calls = HandlerCalls()
+        let response = try await whoami(authorization: "Bearer unknown-token", handlerCalls: calls)
 
-        #expect(response.status == .ok)
-        #expect(response.body == "- - -")
+        #expect(response.status == .unauthorized)
+        #expect(await calls.count == 0)
     }
 
     @Test("A refused token is 401 Unauthorized before the route runs")
     func refusedTokenIsUnauthorized() async throws {
-        let response = try await whoami(authorization: "Bearer expired-token")
+        let calls = HandlerCalls()
+        let response = try await whoami(authorization: "Bearer expired-token", handlerCalls: calls)
 
         #expect(response.status == .unauthorized)
+        #expect(await calls.count == 0)
     }
 
     enum TraceKey: ServiceContextKey {
@@ -149,5 +160,14 @@ struct BearerAuthenticationMiddlewareTests {
             #expect(alice.status == .ok)
             #expect(alice.body == "alice")
         }
+    }
+}
+
+/// Counts route invocations across the framework's responder tasks.
+actor HandlerCalls {
+    private(set) var count = 0
+
+    func record() {
+        count += 1
     }
 }

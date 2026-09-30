@@ -3,7 +3,7 @@
 Binding who is calling on Hummingbird: a bearer token, proved and set on the request context.
 
 ```swift
-.package(url: "https://github.com/swift-microservices/swift-authentication-hummingbird.git", from: "0.2.0"),
+.package(url: "https://github.com/swift-microservices/swift-authentication-hummingbird.git", from: "0.3.0"),
 ```
 
 ```swift
@@ -32,13 +32,13 @@ router.group("/account")
 ```
 
 A request with no token continues anonymously, which is what an open route needs: signing in
-mints the first token and has no caller yet. A token the authenticator declines continues unbound.
-A token it refuses is `401 Unauthorized`, because absent and invalid are not the same thing.
-Requiring a caller is a route's decision, made with `IsAuthenticatedMiddleware`.
+mints the first token and has no caller yet. `Authenticator.authenticate(_:)` returns an identity
+or throws. A failed authentication ends the request with `401 Unauthorized` before the route
+runs. Requiring a caller is a route's decision, made with `IsAuthenticatedMiddleware`.
 
 ## Requirements
 
-Swift 6.3, macOS 15 or Linux. Hummingbird 2.27, HummingbirdAuth 2.5, swift-authentication 0.2.
+Swift 6.3, macOS 15 or Linux. Hummingbird 2.27, HummingbirdAuth 2.5, swift-authentication 0.3.
 
 ## Development
 

@@ -24,10 +24,9 @@ Requiring a caller is a route's decision, not the middleware's. `IsAuthenticated
 route group refuses requests whose context has no identity, and a handler on such a route can
 unwrap `context.identity` without a check.
 
-## Absent is not invalid
+## Authenticating a presented token
 
-A token the authenticator declines continues unbound, the same as no token. A token it refuses
-is `401 Unauthorized` before any route runs, because a token that was presented and does not
-verify is an error the caller must see. The rejection is an `HTTPError` rather than the
-authenticator's own error, which carries no status and would be reported as a server fault, the
-wrong answer for the most ordinary request a client makes: one holding a token that has expired.
+`Authenticator.authenticate(_:)` returns an identity or throws. A presented token must
+authenticate successfully; a failure ends the request with `401 Unauthorized` before the route
+runs. The middleware maps the authenticator's error to an `HTTPError(.unauthorized)` so the
+client receives the authentication status.

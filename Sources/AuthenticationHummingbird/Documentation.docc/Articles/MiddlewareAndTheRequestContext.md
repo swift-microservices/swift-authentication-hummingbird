@@ -12,17 +12,14 @@ a use case, a repository, an outgoing gRPC call, reads the task's `ServiceContex
 
 The `ServiceContext` binding is what lets a Hummingbird gateway relay a person's call to a gRPC
 service as that person: swift-authentication-grpc's propagation interceptor reads the principal
-the middleware bound and presents its token onward.
+the middleware bound and presents its original token on upstream user descriptors.
 
-## Open routes and protected routes
+## User routes
 
-A request with no token continues anonymously. That is what an open route needs, and the
-middleware is applied to the whole router: signing in and registering mint the first token and
-have no caller yet.
-
-Requiring a caller is a route's decision, not the middleware's. `IsAuthenticatedMiddleware` on a
-route group refuses requests whose context has no identity, and a handler on such a route can
-unwrap `context.identity` without a check.
+Apply bearer authentication and `IsAuthenticatedMiddleware` to the user route group. Missing
+credentials continue unbound in the bearer middleware; `IsAuthenticatedMiddleware` requires the
+identity before the handler runs. The owning use case checks user permissions and resource
+access.
 
 ## Authenticating a presented token
 

@@ -17,13 +17,18 @@ The middleware's context is any `AuthRequestContext`; the token's identity is th
 Authentication returns an identity or throws. A missing credential continues anonymously;
 a failed authentication ends the request with `401 Unauthorized` before the handler runs.
 
+## Backend calls
+
+mTLS secures connections to backend services. Forward the original user JWT only on upstream
+user RPC descriptors, where the receiving service verifies it and the owning use case checks
+permissions. User database settings follow the user operation.
+
 ## Example
 
 ```swift
 let router = Router(context: BasicAuthRequestContext<AppToken>.self)
-router.add(middleware: BearerAuthenticationMiddleware(authenticator: authenticator))
-
 router.group("/account")
+    .add(middleware: BearerAuthenticationMiddleware(authenticator: authenticator))
     .add(middleware: IsAuthenticatedMiddleware())
     .get("/") { _, context in context.identity! }
 ```

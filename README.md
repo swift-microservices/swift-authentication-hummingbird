@@ -24,9 +24,8 @@ and sets the identity in two places:
 
 ```swift
 let router = Router(context: BasicAuthRequestContext<AppToken>.self)
-router.add(middleware: BearerAuthenticationMiddleware(authenticator: JWTAuthenticator<AppToken>(keys: keys)))
-
 router.group("/account")
+    .add(middleware: BearerAuthenticationMiddleware(authenticator: JWTAuthenticator<AppToken>(keys: keys)))
     .add(middleware: IsAuthenticatedMiddleware())
     .get("/") { _, context in context.identity! }
 ```
@@ -35,6 +34,12 @@ A request with no token continues anonymously, which is what an open route needs
 mints the first token and has no caller yet. `Authenticator.authenticate(_:)` returns an identity
 or throws. A failed authentication ends the request with `401 Unauthorized` before the route
 runs. Requiring a caller is a route's decision, made with `IsAuthenticatedMiddleware`.
+
+## Backend calls
+
+mTLS secures connections to backend services. Forward the original user JWT only on upstream
+user RPC descriptors, where the receiving service verifies it and the owning use case checks
+permissions. User database settings follow the user operation.
 
 ## Requirements
 

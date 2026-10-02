@@ -6,8 +6,8 @@ Where the proven identity goes on Hummingbird, and how a route asks for one.
 
 Hummingbird code reads an identity in two ways. Route handlers and HummingbirdAuth's
 `IsAuthenticatedMiddleware` read the request context's `identity`, which is why the middleware's
-context is any `AuthRequestContext`. Everything downstream of a handler that is not Hummingbird,
-a use case, a repository, an outgoing gRPC call, reads the task's `ServiceContext`.
+context is any `AuthRequestContext`. Transport-independent adapters, such as outgoing gRPC propagation, read the task’s
+`ServiceContext`. The handler passes the verified identity explicitly to a user use case.
 ``BearerAuthenticationMiddleware`` sets both, so each reader finds the same caller.
 
 The `ServiceContext` binding is what lets a Hummingbird gateway relay a person's call to a gRPC
@@ -20,6 +20,9 @@ Apply bearer authentication and `IsAuthenticatedMiddleware` to the user route gr
 credentials continue unbound in the bearer middleware; `IsAuthenticatedMiddleware` requires the
 identity before the handler runs. The owning use case checks user permissions and resource
 access.
+
+Keep login and refresh routes outside this authenticated group so an attached expired access
+token cannot prevent credential recovery.
 
 ## Authenticating a presented token
 

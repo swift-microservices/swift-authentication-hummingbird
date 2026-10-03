@@ -1,5 +1,7 @@
 # swift-authentication-hummingbird
 
+[![Documentation](https://img.shields.io/badge/docc-read_documentation-blue)](https://swiftpackageindex.com/swift-microservices/swift-authentication-hummingbird/documentation)
+
 Binding who is calling on Hummingbird: a bearer token, proved and set on the request context.
 
 ```swift

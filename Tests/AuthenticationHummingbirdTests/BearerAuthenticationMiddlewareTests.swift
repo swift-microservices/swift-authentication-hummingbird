@@ -156,7 +156,9 @@ struct BearerAuthenticationMiddlewareTests {
 
             var headers = HTTPFields()
             headers[.authorization] = "Bearer alice-token"
-            let alice = try await client.execute(uri: "/protected/", method: .get, headers: headers) { (status: $0.status, body: String(buffer: $0.body)) }
+            let alice = try await client.execute(uri: "/protected/", method: .get, headers: headers) {
+                (status: $0.status, body: String(buffer: $0.body))
+            }
             #expect(alice.status == .ok)
             #expect(alice.body == "alice")
         }

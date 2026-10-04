@@ -18,21 +18,27 @@ import ServiceContextModule
 /// `PrincipalKey<Context.Identity, String>`, which everything downstream of the handler reads,
 /// including outgoing gRPC calls that present the same token onward.
 ///
+/// Add it to the user route group, with `IsAuthenticatedMiddleware` after it where a route
+/// requires a caller. Keep sign-in and refresh routes outside that group, so an expired token a
+/// client still attaches cannot block recovery:
+///
 /// ```swift
 /// let router = Router(context: BasicAuthRequestContext<AppToken>.self)
-/// router.add(middleware: BearerAuthenticationMiddleware(authenticator: authenticator))
+/// router.group("/account")
+///     .add(middleware: BearerAuthenticationMiddleware(authenticator: authenticator))
+///     .add(middleware: IsAuthenticatedMiddleware())
 /// ```
-///
-/// Requiring a caller is a route's decision: add `IsAuthenticatedMiddleware` to the routes that
-/// need one.
 public struct BearerAuthenticationMiddleware<Context: AuthRequestContext>: RouterMiddleware {
     private let authenticator: any Authenticator<String, Context.Identity>
 
+    /// A middleware that proves bearer tokens with `authenticator`.
+    ///
     /// - Parameter authenticator: Proves the token, such as a `JWTAuthenticator`.
     public init(authenticator: any Authenticator<String, Context.Identity>) {
         self.authenticator = authenticator
     }
 
+    /// Authenticates the request's bearer token, if it has one, and runs `next` with the identity set.
     public func handle(
         _ request: Request,
         context: Context,

@@ -5,7 +5,7 @@
 public import Authentication
 public import Hummingbird
 public import HummingbirdAuth
-import ServiceContextModule
+import OperationContext
 
 /// Binds the principal a bearer token proves, for the length of the request.
 ///
@@ -14,7 +14,7 @@ import ServiceContextModule
 /// throws. A failed authentication ends the request with `401 Unauthorized` before the route runs.
 ///
 /// The proven identity is set in two places: the request context's `identity`, which
-/// `IsAuthenticatedMiddleware` and route handlers read, and the task's `ServiceContext` under
+/// `IsAuthenticatedMiddleware` and route handlers read, and the task's `OperationContext` under
 /// `PrincipalKey<Context.Identity, String>`, which everything downstream of the handler reads,
 /// including outgoing gRPC calls that present the same token onward.
 ///
@@ -53,10 +53,10 @@ public struct BearerAuthenticationMiddleware<Context: AuthRequestContext>: Route
         var context = context
         context.identity = identity
 
-        var serviceContext = ServiceContext.current ?? .topLevel
-        serviceContext[PrincipalKey<Context.Identity, String>.self] = Principal(identity: identity, credential: token)
+        var operationContext = OperationContext.current
+        operationContext[PrincipalKey<Context.Identity, String>.self] = Principal(identity: identity, credential: token)
 
-        return try await ServiceContext.withValue(serviceContext) {
+        return try await OperationContext.withContext(operationContext) {
             try await next(request, context)
         }
     }

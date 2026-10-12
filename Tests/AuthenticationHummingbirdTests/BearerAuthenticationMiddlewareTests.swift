@@ -7,7 +7,7 @@ import AuthenticationHummingbird
 import Hummingbird
 import HummingbirdAuth
 import HummingbirdTesting
-import ServiceContextModule
+import OperationContext
 import Testing
 
 @Suite
@@ -38,7 +38,7 @@ struct BearerAuthenticationMiddlewareTests {
     typealias Context = BasicAuthRequestContext<Claims>
 
     /// An application with the middleware and one route that reports what it saw: the request
-    /// context's identity and the ServiceContext principal, or `-` for neither.
+    /// context's identity and the OperationContext principal, or `-` for neither.
     func application(handlerCalls: HandlerCalls) -> Application<RouterResponder<Context>> {
         let router = Router(context: Context.self)
         router.add(
@@ -48,7 +48,7 @@ struct BearerAuthenticationMiddlewareTests {
         )
         router.get("/whoami") { _, context in
             await handlerCalls.record()
-            let principal = ServiceContext.current?[PrincipalKey<Claims, String>.self]
+            let principal = OperationContext.current[PrincipalKey<Claims, String>.self]
             return "\(context.identity?.subject ?? "-") \(principal?.identity.subject ?? "-") \(principal?.credential ?? "-")"
         }
         return Application(router: router)
@@ -104,16 +104,16 @@ struct BearerAuthenticationMiddlewareTests {
         #expect(await calls.count == 0)
     }
 
-    enum TraceKey: ServiceContextKey {
+    enum RequestIDKey: OperationContextKey {
         typealias Value = String
     }
 
-    @Test("A proved token adds the principal to the ServiceContext already bound")
-    func provedTokenKeepsEnclosingServiceContext() async throws {
-        var enclosing = ServiceContext.topLevel
-        enclosing[TraceKey.self] = "trace-1"
+    @Test("A proved token adds the principal to the OperationContext already bound")
+    func provedTokenKeepsEnclosingOperationContext() async throws {
+        var enclosing = OperationContext()
+        enclosing[RequestIDKey.self] = "request-1"
 
-        let body = try await ServiceContext.withValue(enclosing) {
+        let body = try await OperationContext.withContext(enclosing) {
             let router = Router(context: Context.self)
             router.add(
                 middleware: BearerAuthenticationMiddleware(
@@ -121,8 +121,8 @@ struct BearerAuthenticationMiddlewareTests {
                 )
             )
             router.get("/context") { _, _ in
-                let context = ServiceContext.current
-                return "\(context?[TraceKey.self] ?? "-") \(context?[PrincipalKey<Claims, String>.self]?.identity.subject ?? "-")"
+                let context = OperationContext.current
+                return "\(context[RequestIDKey.self] ?? "-") \(context[PrincipalKey<Claims, String>.self]?.identity.subject ?? "-")"
             }
 
             return try await Application(router: router).test(.router) { client in
@@ -132,7 +132,7 @@ struct BearerAuthenticationMiddlewareTests {
             }
         }
 
-        #expect(body == "trace-1 alice")
+        #expect(body == "request-1 alice")
     }
 
     @Test("A proved token satisfies IsAuthenticatedMiddleware on a protected route")

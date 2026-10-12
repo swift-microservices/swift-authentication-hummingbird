@@ -7,7 +7,7 @@ Binding who is calling on Hummingbird: a bearer token, proved and set on the req
 ``BearerAuthenticationMiddleware`` reads the `Authorization` header, proves the token with an
 `Authenticator<String, Identity>` from swift-authentication, and sets the identity in two
 places: the request context's `identity`, which HummingbirdAuth's `IsAuthenticatedMiddleware`
-and route handlers read, and the task's `ServiceContext` as a `Principal<Identity, String>`,
+and route handlers read, and the task's `OperationContext` as a `Principal<Identity, String>`,
 which everything downstream reads, including outgoing gRPC calls that present the same token
 onward.
 

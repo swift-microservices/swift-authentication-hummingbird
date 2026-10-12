@@ -8,7 +8,7 @@ This package binds principals on Hummingbird. Read this before changing anything
   `RouterMiddleware` over any `AuthRequestContext`, taking any `Authenticator<String, Identity>`
   from swift-authentication.
 - It sets the identity in both places Hummingbird code reads it: the request context's
-  `identity`, for `IsAuthenticatedMiddleware` and handlers, and the `ServiceContext` principal,
+  `identity`, for `IsAuthenticatedMiddleware` and handlers, and the `OperationContext` principal,
   for everything downstream. Keep both in step.
 - Authentication returns an identity or throws. An identity binds; a failure ends the request
   with `HTTPError(.unauthorized)` before the route runs. A request with no token never reaches

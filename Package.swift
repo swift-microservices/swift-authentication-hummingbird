@@ -31,9 +31,9 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/swift-microservices/swift-authentication.git", from: "0.3.0"),
-        .package(url: "https://github.com/apple/swift-service-context.git", from: "1.3.0"),
-        .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.27.0", traits: []),
+        .package(url: "https://github.com/swift-microservices/swift-authentication.git", from: "0.4.0"),
+        .package(url: "https://github.com/swift-microservices/swift-operation-context.git", from: "0.1.0"),
+        .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.28.0", traits: []),
         .package(url: "https://github.com/hummingbird-project/hummingbird-auth.git", from: "2.5.0"),
     ],
     targets: [
@@ -43,7 +43,7 @@ let package = Package(
                 .product(name: "Authentication", package: "swift-authentication"),
                 .product(name: "Hummingbird", package: "hummingbird"),
                 .product(name: "HummingbirdAuth", package: "hummingbird-auth"),
-                .product(name: "ServiceContextModule", package: "swift-service-context"),
+                .product(name: "OperationContext", package: "swift-operation-context"),
             ],
             swiftSettings: swiftSettings
         ),
@@ -55,7 +55,7 @@ let package = Package(
                 .product(name: "Hummingbird", package: "hummingbird"),
                 .product(name: "HummingbirdAuth", package: "hummingbird-auth"),
                 .product(name: "HummingbirdTesting", package: "hummingbird"),
-                .product(name: "ServiceContextModule", package: "swift-service-context"),
+                .product(name: "OperationContext", package: "swift-operation-context"),
             ],
             swiftSettings: swiftSettings
         ),

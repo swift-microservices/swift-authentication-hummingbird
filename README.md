@@ -5,7 +5,7 @@
 Binding who is calling on Hummingbird: a bearer token, proved and set on the request context.
 
 ```swift
-.package(url: "https://github.com/swift-microservices/swift-authentication-hummingbird.git", from: "0.3.0"),
+.package(url: "https://github.com/swift-microservices/swift-authentication-hummingbird.git", from: "0.4.0"),
 ```
 
 ```swift
@@ -20,7 +20,7 @@ and sets the identity in two places:
 
 - the request context's `identity`, which HummingbirdAuth's `IsAuthenticatedMiddleware` and
   route handlers read;
-- the task's `ServiceContext`, as a `Principal<Identity, String>` under
+- the task's `OperationContext`, as a `Principal<Identity, String>` under
   `PrincipalKey<Identity, String>`, which everything downstream reads, including outgoing gRPC
   calls that present the same token onward through swift-authentication-grpc.
 
@@ -47,7 +47,7 @@ permissions. User database settings follow the user operation.
 
 ## Requirements
 
-Swift 6.3, macOS 15 or Linux. Hummingbird 2.27, HummingbirdAuth 2.5, swift-authentication 0.3.
+Swift 6.3, macOS 15 or Linux. Hummingbird 2.28, HummingbirdAuth 2.5, swift-authentication 0.4.
 
 ## Development
 

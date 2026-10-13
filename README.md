@@ -47,7 +47,7 @@ permissions. User database settings follow the user operation.
 
 ## Requirements
 
-Swift 6.3, macOS 15 or Linux. Hummingbird 2.27, HummingbirdAuth 2.5, swift-authentication 0.4.
+Swift 6.3, macOS 15 or Linux. Hummingbird 2.28, HummingbirdAuth 2.5, swift-authentication 0.4.
 
 ## Development
 

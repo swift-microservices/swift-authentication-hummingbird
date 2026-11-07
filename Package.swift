@@ -31,8 +31,8 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/swift-microservices/swift-authentication.git", from: "0.4.0"),
-        .package(url: "https://github.com/swift-microservices/swift-operation-context.git", from: "0.1.0"),
+        .package(url: "https://github.com/swift-microservices/swift-authentication.git", from: "1.0.0"),
+        .package(url: "https://github.com/swift-microservices/swift-operation-context.git", from: "1.0.0"),
         .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.28.0", traits: []),
         .package(url: "https://github.com/hummingbird-project/hummingbird-auth.git", from: "2.5.0"),
     ],

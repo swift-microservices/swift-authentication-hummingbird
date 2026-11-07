@@ -5,7 +5,7 @@
 Binding who is calling on Hummingbird: a bearer token, proved and set on the request context.
 
 ```swift
-.package(url: "https://github.com/swift-microservices/swift-authentication-hummingbird.git", from: "0.4.0"),
+.package(url: "https://github.com/swift-microservices/swift-authentication-hummingbird.git", from: "1.0.0"),
 ```
 
 ```swift
@@ -15,8 +15,9 @@ Binding who is calling on Hummingbird: a bearer token, proved and set on the req
 ## The middleware
 
 `BearerAuthenticationMiddleware` reads the `Authorization` header, proves the token with an
-`Authenticator<String, Identity>` from [swift-authentication](https://github.com/swift-microservices/swift-authentication),
-and sets the identity in two places:
+`Authenticator<String, Identity>` from [swift-authentication](https://github.com/swift-microservices/swift-authentication)
+(such as `JWTAuthenticator` from [swift-authentication-jwt](https://github.com/swift-microservices/swift-authentication-jwt),
+used below), and sets the identity in two places:
 
 - the request context's `identity`, which HummingbirdAuth's `IsAuthenticatedMiddleware` and
   route handlers read;
@@ -47,7 +48,8 @@ permissions. User database settings follow the user operation.
 
 ## Requirements
 
-Swift 6.3, macOS 15 or Linux. Hummingbird 2.28, HummingbirdAuth 2.5, swift-authentication 0.4.
+Swift 6.3, macOS 15 or Linux. Hummingbird 2.28, HummingbirdAuth 2.5, swift-authentication 1.0,
+swift-operation-context 1.0.
 
 ## Development
 

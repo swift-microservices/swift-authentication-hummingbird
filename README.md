@@ -176,8 +176,6 @@ Related packages:
   `JWTAuthenticator` and `JWTIssuer`
 - [swift-authentication-grpc](https://github.com/swift-microservices/swift-authentication-grpc) -
   the same binding for gRPC, and propagation of the token onward
-- [swift-authentication-vapor](https://github.com/swift-microservices/swift-authentication-vapor) -
-  the same middleware for Vapor
 
 ## 🧰 Release Info
 
